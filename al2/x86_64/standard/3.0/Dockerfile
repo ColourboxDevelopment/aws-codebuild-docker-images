@@ -61,6 +61,23 @@ RUN set -ex \
    && rm -rf $GIT_TAR_FILE /tmp/*
 
 
+# Install Chromium
+RUN set -ex \
+    && yum install -y chromium
+
+# Install ChromeDriver
+RUN set -ex \
+    && CHROME_VERSION=`chromium-browser --version | awk -F '[ .]' '{print $2"."$3"."$4}'` \
+    && CHROME_DRIVER_VERSION=`wget -nv -qO- chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION` \
+    && wget -nv -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
+    && unzip /tmp/chromedriver_linux64.zip -d /opt \
+    && rm /tmp/chromedriver_linux64.zip \
+    && mv /opt/chromedriver /opt/chromedriver-$CHROME_DRIVER_VERSION \
+    && chmod 755 /opt/chromedriver-$CHROME_DRIVER_VERSION \
+    && ln -s /opt/chromedriver-$CHROME_DRIVER_VERSION /usr/bin/chromedriver \
+    && chromedriver --version
+
+
 # AWS Tools
 # https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_CLI_installation.html
 RUN curl -sS -o /usr/local/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.8/2020-04-16/bin/linux/amd64/aws-iam-authenticator \
@@ -79,15 +96,28 @@ RUN set -ex \
 FROM tools AS runtimes_1
 
 #****************      PHP     ****************************************************
-ENV PHP_73_VERSION="7.3.19"
 RUN set -ex \
     && amazon-linux-extras enable php7.4 \
     && yum clean metadata \
-    && yum install -y php php-{pear,cgi,common,curl,mbstring,gd,mysqlnd,gettext,bcmath,json,xml,fpm,intl,zip,memcached}  
+    && yum install -y php php-{pear,cgi,common,curl,mbstring,gd,mysqlnd,gettext,bcmath,json,xml,fpm,intl,zip,soap,memcached}  
 
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
+RUN echo "date.timezone = Europe/Berlin" >> "/etc/php.d/42-timezone.ini"
 #****************      END PHP     ****************************************************
+
+#****************      NodeJS (v12)     ****************************************************
+RUN set -ex \
+    && curl -sL https://rpm.nodesource.com/setup_12.x | bash - \
+    && yum install -y nodejs 
+#****************      END NodeJs     ****************************************************
+
+#****************      Python     ****************************************************
+RUN set -ex \
+    && yum install -y python3 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.7 42 \
+    && pip3 install boto3 
+#****************      END Python     ****************************************************
 
 #=======================End of layer: runtimes_1  =================
 FROM runtimes_1 AS runtimes_2
