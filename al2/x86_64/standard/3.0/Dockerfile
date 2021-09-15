@@ -95,6 +95,13 @@ RUN set -ex \
 
 FROM tools AS runtimes_1
 
+
+# Install nginx and setup some paths our build steps expects
+RUN set -ex \
+    && yum install -y nginx \
+    && mkdir /etc/nginx/roots \
+    && mkdir /etc/nginx/site-config 
+
 #****************      PHP     ****************************************************
 RUN set -ex \
     && amazon-linux-extras enable php7.4 \
@@ -111,6 +118,11 @@ RUN set -ex \
     && curl -sL https://rpm.nodesource.com/setup_12.x | bash - \
     && yum install -y nodejs 
 #****************      END NodeJs     ****************************************************
+
+#****************      MySQL     ****************************************************
+RUN set -ex \
+    && yum install -y mysql 
+#****************      MySQL     ****************************************************
 
 #****************      Python     ****************************************************
 RUN set -ex \
@@ -148,6 +160,9 @@ RUN set -ex \
     && curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-Linux-x86_64 > /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/dind /usr/local/bin/docker-compose \
     && docker-compose version
+
+RUN set -ex \
+    && ln -s /usr/local/bin/dockerd /usr/bin/dockerd 
 
 #===================END of runtimes_3 ==============
 FROM runtimes_2 AS al2_v3
