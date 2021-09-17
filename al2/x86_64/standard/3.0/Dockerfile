@@ -98,9 +98,7 @@ FROM tools AS runtimes_1
 
 # Install nginx and setup some paths our build steps expects
 RUN set -ex \
-    && yum install -y nginx \
-    && mkdir /etc/nginx/roots \
-    && mkdir /etc/nginx/site-config 
+    && yum install -y nginx 
 
 #****************      PHP     ****************************************************
 RUN set -ex \
