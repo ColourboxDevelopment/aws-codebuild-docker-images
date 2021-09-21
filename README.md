@@ -1,3 +1,12 @@
+# See this section for Colourbox specific changes
+We use a modified Amazon Linux 2 image. See [this docker file](https://github.com/ColourboxDevelopment/aws-codebuild-docker-images/blob/master/al2/x86_64/standard/3.0/Dockerfile)
+
+## Generate a new image
+1. Modify the Docker file
+2. `docker build -t colourbox/codebuild/amazonlinux2-x86_64-php74:3.0 .` Change tag accordingly
+3. `docker tag colourbox/codebuild/amazonlinux2-x86_64-php74:3.0 233403125868.dkr.ecr.eu-west-1.amazonaws.com/codebuild-php:php74` We tag it in the format that ECR like. Remember to use the same tag as in step 2. 
+4. `docker push 233403125868.dkr.ecr.eu-west-1.amazonaws.com/codebuild-php:php74` If the tag already exists it will be overwritten. This is smart for just bug fixes. Otherwise use a new tag. 
+
 # AWS CodeBuild curated Docker images
 
 This repository holds Dockerfiles of official AWS CodeBuild curated Docker images. Please refer to [the AWS CodeBuild User Guide](http://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref.html) for list of environments supported by AWS CodeBuild.
