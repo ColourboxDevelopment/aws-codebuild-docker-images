@@ -102,13 +102,15 @@ RUN set -ex \
 
 #****************      PHP     ****************************************************
 RUN set -ex \
-    && amazon-linux-extras enable php7.4 \
+    && amazon-linux-extras enable php8.0 \
     && yum clean metadata \
-    && yum install -y php php-{pear,cgi,common,curl,mbstring,gd,mysqlnd,gettext,bcmath,json,xml,fpm,intl,zip,soap,memcached}  
+    && yum install -y php php-{pear,cgi,common,curl,mbstring,gd,mysqlnd,gettext,bcmath,json,xml,fpm,intl,zip,soap,devel} libmemcached-devel  \
+    && /usr/bin/yes 'no'| /usr/bin/pecl install memcached 
 
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 RUN echo "date.timezone = Europe/Berlin" >> "/etc/php.d/42-timezone.ini"
+RUN echo "extension=memcached.so" >> "/etc/php.d/101-memcached.ini"
 #****************      END PHP     ****************************************************
 
 #****************      NodeJS (v12)     ****************************************************
